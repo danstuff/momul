@@ -4,3 +4,14 @@ body {
     width: 100%;
     height: 100%;
 }
+
+#root {
+    margin: 64px auto;
+    width: 640px;
+    height: 640px;
+}
+
+#about {
+    margin: 0 auto;
+    max-width: 800px;
+}
