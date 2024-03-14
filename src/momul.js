@@ -68,6 +68,7 @@ var team_b =
 };
 
 var ai_lock = false;
+var winner_lock = false;
 
 var two;
 
@@ -112,26 +113,48 @@ function startup($root)
         let tx = Math.floor(cx / config.tile_size);
         let ty = Math.floor(cy / config.tile_size);
 
-        if (!isInside(tx, ty) || ai_lock)
+        if (!isInside(tx, ty) || ai_lock || winner_lock)
         {
             return;
         }
         
         if (movePiece(team_a, tx, ty)) 
         {
-            ai_lock = true;
-            let best_move = ai.findBestMove(team_b);
-            setTimeout(() =>
+            if (tx == team_b.goal_x && 
+                ty == team_b.goal_y)
             {
-                movePiece(team_b, best_move[0], best_move[1]);
-            }, 500);
-            setTimeout(() =>
+                endGame("You win!");
+            }
+            else
             {
-                movePiece(team_b, best_move[2], best_move[3]);
-                ai_lock = false;
-            }, 1000);
+                ai_lock = true;
+
+                let best_move;
+                setTimeout(() =>
+                {
+                    best_move = ai.findBestMove(team_b);
+                }, 250);
+                setTimeout(() =>
+                {
+                    movePiece(team_b, best_move[0], best_move[1]);
+                }, 500);
+                setTimeout(() =>
+                {
+                    movePiece(team_b, best_move[2], best_move[3]);
+                    if (best_move[2] == team_a.goal_x &&
+                        best_move[3] == team_a.goal_y)
+                    { 
+                        endGame("Computer wins!");
+                    }
+                    ai_lock = false;
+                }, 1000);
+            }
         }
         updateGhosts(team_a);
+
+        if (winner_lock)
+        {
+        }
     });
 }
 
@@ -232,7 +255,6 @@ function movePiece(team, tx, ty)
     let piece_clicked = ai.getPiece(team, tx, ty);
     if (piece_clicked)
     {
-        console.log(piece_clicked);
         setPieceSelected(team, piece_clicked);
     }
     return false;
@@ -348,6 +370,12 @@ function setPieceSelected(team, piece)
             .start();
         team.piece_selected = piece;
     }
+}
+
+function endGame(text)
+{
+    two.add(new Two.Text(text, two.width/2, two.height/2, { size: 32 }));
+    winner_lock = true;
 }
 
 export { startup };

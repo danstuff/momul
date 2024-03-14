@@ -30,9 +30,9 @@ function getPiece(team, tx, ty)
 
 function forEachTile(callback)
 {
-    for (let x = 0; x <= config.tiles_per_row; x++)
+    for (let x = 0; x < config.tiles_per_row; x++)
     {
-        for (let y = 0; y <= config.tiles_per_row; y++)
+        for (let y = 0; y < config.tiles_per_row; y++)
         {
             let r = callback(x, y);
             if (r)
@@ -130,7 +130,6 @@ function isValidMul(team, piece, tx, ty)
 
 function isSafeSpace(team, tx, ty)
 {
-    // TODO
     let safe = true;
     forEachPiece(team.enemy, (piece) =>
     {
@@ -145,25 +144,23 @@ function isSafeSpace(team, tx, ty)
 
 function onSameSide(pivot, a, b)
 {
-    return (a < pivot && b < pivot) || (a > pivot && b > pivot);
+    return (a <= pivot && b <= pivot) || (a >= pivot && b >= pivot);
 }
 
 function isDefense(team, tx, ty)
 {
-    //TODO
     let defense = false;
     forEachPiece(team.enemy, (piece) =>
     {
+        /* If true, the enemy piece can take the goal */
         let goal_valid = isValidMove(team.enemy, piece, team.goal_x, team.goal_y) ||
             isValidMul(team.enemy, piece, team.goal_x, team.goal_y);
 
-        let tile_valid = isValidMove(team.enemy, piece, team.goal_x, team.goal_y) ||
-            isValidMul(team.enemy, piece, team.goal_x, team.goal_y);
-
-        let same_side = onSameSide(getPieceX(piece), tx, team.goal_x) ||
+        /* If true, moving to [tx, ty] will block the enemy piece from taking the goal */
+        let can_block = onSameSide(getPieceX(piece), tx, team.goal_x) &&
             onSameSide(getPieceY(piece), ty, team.goal_y);
         
-        if (goal_valid && tile_valid && same_side)
+        if (goal_valid && can_block)
         {
             defense = true;
         }
@@ -193,10 +190,11 @@ function findBestMove(team)
 {
     let candidates = 
     {
-        a : [], /* Valid defense moves */
-        b : [], /* Valid and safe attack moves */
-        c : [], /* Valid and safe neutral moves */
-        d : [], /* Remaining valid moves */
+        a : [], /* Winning moves */
+        b : [], /* Defense moves */
+        c : [], /* Safe attack moves */
+        d : [], /* Safe neutral moves */
+        e : [], /* Remaining valid moves */
     }; 
 
     /* Search every piece and tile for valid moves */
@@ -208,24 +206,28 @@ function findBestMove(team)
                 isValidMul(team, piece, tx, ty))
             {
                 let move = [ getPieceX(piece), getPieceY(piece), tx, ty ];
-                if (isDefense(team, tx, ty))
+                if (team.enemy.goal_x == tx && team.enemy.goal_y == ty)
                 {
                     candidates.a.push(move);
+                }
+                else if (isDefense(team, tx, ty))
+                {
+                    candidates.b.push(move);
                 }
                 else if (isSafeSpace(team, tx, ty))
                 {   
                     if (getPiece(team.enemy, tx, ty))
                     {
-                        candidates.b.push(move);
+                        candidates.c.push(move);
                     }
                     else
                     {
-                        candidates.c.push(move);
+                        candidates.d.push(move);
                     }
                 }
                 else
                 {
-                    candidates.d.push(move);
+                    candidates.e.push(move);
                 }
             }
             
@@ -240,12 +242,12 @@ function findBestMove(team)
     {
         function compare(a, b) 
         {
-            return manhattan(team.enemy.goal_x, team.enemy.goal_y, a[2], a[3]) < 
+            return manhattan(team.enemy.goal_x, team.enemy.goal_y, a[2], a[3]) > 
                 manhattan(team.enemy.goal_x, team.enemy.goal_y, b[2], b[3])
         }
         array.sort(compare);
     });
-
+    
     /* Return first result out of all gathered moves */
     return forEach(candidates, (array) =>
     {
