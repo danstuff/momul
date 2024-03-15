@@ -133,11 +133,11 @@ function startup($root)
                 setTimeout(() =>
                 {
                     best_move = ai.findBestMove(team_b);
-                }, 250);
+                }, 1000);
                 setTimeout(() =>
                 {
                     movePiece(team_b, best_move[0], best_move[1]);
-                }, 500);
+                }, 1500);
                 setTimeout(() =>
                 {
                     movePiece(team_b, best_move[2], best_move[3]);
@@ -147,7 +147,7 @@ function startup($root)
                         endGame("Computer wins!");
                     }
                     ai_lock = false;
-                }, 1000);
+                }, 2000);
             }
         }
         updateGhosts(team_a);

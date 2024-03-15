@@ -142,7 +142,7 @@ function isSafeSpace(team, tx, ty)
     return safe;
 }
 
-function onSameSide(pivot, a, b)
+function isBetween(pivot, a, b)
 {
     return (a <= pivot && b <= pivot) || (a >= pivot && b >= pivot);
 }
@@ -157,8 +157,8 @@ function isDefense(team, tx, ty)
             isValidMul(team.enemy, piece, team.goal_x, team.goal_y);
 
         /* If true, moving to [tx, ty] will block the enemy piece from taking the goal */
-        let can_block = onSameSide(getPieceX(piece), tx, team.goal_x) &&
-            onSameSide(getPieceY(piece), ty, team.goal_y);
+        let can_block = isBetween(tx, getPieceX(piece), team.goal_x) &&
+            isBetween(ty, getPieceY(piece), team.goal_y);
         
         if (goal_valid && can_block)
         {
@@ -242,11 +242,13 @@ function findBestMove(team)
     {
         function compare(a, b) 
         {
-            return manhattan(team.enemy.goal_x, team.enemy.goal_y, a[2], a[3]) > 
+            return manhattan(team.enemy.goal_x, team.enemy.goal_y, a[2], a[3]) < 
                 manhattan(team.enemy.goal_x, team.enemy.goal_y, b[2], b[3])
         }
         array.sort(compare);
     });
+
+    console.log(candidates);
     
     /* Return first result out of all gathered moves */
     return forEach(candidates, (array) =>
