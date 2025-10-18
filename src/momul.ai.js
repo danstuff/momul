@@ -247,8 +247,6 @@ function findBestMove(team)
         }
         array.sort(compare);
     });
-
-    console.log(candidates);
     
     /* Return first result out of all gathered moves */
     return forEach(candidates, (array) =>

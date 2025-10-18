@@ -3,10 +3,10 @@ import TWEEN from "tween.js";
 
 import * as ai from "./momul.ai.js";
 
-const config =
+var config =
 {
     board_size : 640,
-    tiles_per_row: 9,
+    tiles_per_row : 9,
 
     reserve_pieces : 4,
 
@@ -74,15 +74,16 @@ var two;
 
 function startup($root) 
 {
-    config.tile_size = Math.floor(config.board_size / config.tiles_per_row);
+    config.board_size = Math.min(Math.min(config.board_size, window.innerWidth), window.innerHeight);
+    config.tile_size = config.board_size / config.tiles_per_row;
     ai.startup(config);
 
     two = new Two(
     {
         type: Two.Types.svg,
         fullscreen: false,
-        width: 640,
-        height: 640,
+        width: config.board_size,
+        height: config.board_size
     }).appendTo($root[0]);
 
     setupTeam(team_a);
