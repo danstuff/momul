@@ -82,8 +82,8 @@ function startup($root)
     {
         type: Two.Types.svg,
         fullscreen: false,
-        width: config.board_size,
-        height: config.board_size
+        width: config.board_size+1,
+        height: config.board_size+1
     }).appendTo($root[0]);
 
     setupTeam(team_a);
